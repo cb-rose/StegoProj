@@ -31,7 +31,7 @@ public class Steganography {
 	private static ArrayList messageList;
 	private static String messageString;
 
-	public Steganography() { // constructor displays cover image
+	public Steganography() { // default constructor displays cover image
 
 		try {
 
@@ -54,15 +54,15 @@ public class Steganography {
 
 	}
 
-	public Steganography(String imagePath) { // constructor displays cover image
-
+	public Steganography(String imagePath) { // constructor displays cover image and takes image
+											// as parameter
 		try {
 
 			BufferedImage image = ImageIO.read(new File(imagePath)); // reads
 																	// image
-			img = image;
+			img = image; //sets private variable img equal to image
 
-			JFrame frame = new JFrame();
+			JFrame frame = new JFrame(); 			//displays image
 
 			JLabel jImage = new JLabel(new ImageIcon(image));
 			frame.getContentPane().add(jImage, BorderLayout.CENTER);
@@ -72,13 +72,13 @@ public class Steganography {
 			e.printStackTrace();
 		}
 
-		System.out.println("Image height: " + img.getHeight());
+		System.out.println("Image height: " + img.getHeight());	//prints out image height and width
 		System.out.println("Image width: " + img.getWidth());
 
 	}
 
 	public static ArrayList<Integer> convertToBinary(String message) { // converts
-																		// input
+																		// input to array of binary
 		mess = message; // text to binary
 		byte[] bytes = message.getBytes(); // array list
 		ArrayList<Integer> bin = new ArrayList<Integer>();
@@ -93,8 +93,8 @@ public class Steganography {
 
 		}
 
-		key = bin.size();
-		return bin;
+		key = bin.size(); //sets private integer key equal to length of message in binary
+		return bin; //returns array of message in binary
 
 	}
 
@@ -113,13 +113,14 @@ public class Steganography {
 	}
 	
 
-	public static BufferedImage encodeImg(ArrayList<Integer> message) {
+	public static BufferedImage encodeImg(ArrayList<Integer> message) { //encodes message into pixels
+																		//of cover image
 		int messBit;
 		int bit;
 
 		messageList = message;
 
-		BufferedImage newImg = img;
+		BufferedImage newImg = img; //newImg is what will be encoded and returned
 		System.out.println("Size of image: " + img.getHeight() * img.getWidth());
 		System.out.println("Size of message: " + key);
 
@@ -157,7 +158,9 @@ public class Steganography {
 				newImg.setRGB(pos, 0, rgb.getRGB());
 			}*/
 
-			int count = 0;
+			int count = 0; //by incrementing this variable within the for loop, we can loop through the 
+						   //pixels normally while using all three color variables in each pixel to encode
+			
 			for (int row = 0; row < img.getHeight(); row++) {
 				for (int col = 0; col < img.getWidth(); col++) {
 
@@ -170,6 +173,9 @@ public class Steganography {
 					int greenDiff = 0;
 					int redDiff = 0;
 
+					//this if statement checks for each color whether message.size is greater than count
+					//so that there isn't an error if the message isn't divisible by 3 and ends on 
+					//blue or red instead of green
 					if (message.size() > count) {
 
 						String binBlue = Integer.toBinaryString(blue); // converts
@@ -180,19 +186,19 @@ public class Steganography {
 																		// string
 						// gets LSB of blue pixel value
 						bit = Character.getNumericValue(binBlue.charAt(binBlue.length() - 1));
-
 						messBit = message.get(count); // gets bit of message
-														// to embed in image
+													// to embed in image
 						count++;
 
 						// if bit and messBit are the same,
 						// nothing needs to be changed
-
+						//otherwise, bluediff will be 1 or -1 and this will be added to
+						//the blue value to change the least significant bit
 						if (messBit - bit != 0) {
 							blueDiff = messBit - bit;
 						}
 					}
-
+					
 					if (message.size() > count) {
 						String binRed = Integer.toBinaryString(red);
 						bit = Character.getNumericValue(binRed.charAt(binRed.length() - 1));
@@ -214,7 +220,9 @@ public class Steganography {
 						if (messBit - bit != 0)
 							greenDiff = messBit - bit;
 					}
-
+					
+					//changes least significant bits of each color value
+					//to encode message, then changes the pixel in newImg
 					Color rgb = new Color(red + redDiff, green + greenDiff, blue + blueDiff);
 					newImg.setRGB(col, row, rgb.getRGB());
 				}
@@ -235,22 +243,25 @@ public class Steganography {
 		
 
 	
-	public static void decodeKey(BufferedImage encImg)
+	/*public static void decodeKey(BufferedImage encImg)
 	{
 		
-	}
-
+	}*/
+	
+	
+	//Decodes the encoded image, taking the encoded image as a parameter
 	public static void decodeImg(BufferedImage encImg) throws UnsupportedEncodingException {
 		byte[] bytes = new byte[key];
 
 		int count = 0;
 		for (int row = 0; row < img.getHeight(); row++) { // decode message
 			for (int col = 0; col < img.getWidth(); col++) {
-		if (messageList.size() > count) {
+		
+				if (messageList.size() > count) {
 
-					Color c = new Color(encImg.getRGB(col, row));
-					int blue = c.getBlue();
-					bytes[count] = (byte) (blue % 2);
+					Color c = new Color(encImg.getRGB(col, row)); //gets RGB value of pixel
+					int blue = c.getBlue();						  //gets blue value of pixel
+					bytes[count] = (byte) (blue % 2);			  //uses modulus division to get LSB (0 or 1)
 
 					count++;
 
@@ -274,13 +285,13 @@ public class Steganography {
 			}
 		}
 
-		System.out.println("Count: " + count);
+	//	System.out.println("Count: " + count);
 
 		String binString = "";
 		for (int pos = 0; pos < bytes.length; pos++) { // concatenates bits to
 														// string
 			if (pos % 8 == 0 && pos != 0)
-				binString += " ";
+				binString += " "; //adds a space every byte
 
 			binString += Integer.toBinaryString(bytes[pos]);
 
