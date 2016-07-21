@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -6,10 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -30,50 +28,34 @@ public class Steganography {
 	private static int key;
 	private static ArrayList messageList;
 	private static String messageString;
-
-	public Steganography() { // default constructor displays cover image
-
-		try {
-
-			BufferedImage image = ImageIO.read(new File("Img/icon.png")); // reads
-																			// image
-			img = image;
-
-			JFrame frame = new JFrame();
-
-			JLabel jImage = new JLabel(new ImageIcon(image));
-			frame.getContentPane().add(jImage, BorderLayout.CENTER);
-			frame.setSize(300, 250);
-			frame.setVisible(true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		System.out.println("Image height: " + img.getHeight());
-		System.out.println("Image width: " + img.getWidth());
-
-	}
+	private static String imagePath;
 
 	public Steganography(String imagePath) { // constructor displays cover image and takes image
 											// as parameter
-		try {
-
-			BufferedImage image = ImageIO.read(new File(imagePath)); // reads
-																	// image
-			img = image; //sets private variable img equal to image
-
-			JFrame frame = new JFrame(); 			//displays image
-
-			JLabel jImage = new JLabel(new ImageIcon(image));
-			frame.getContentPane().add(jImage, BorderLayout.CENTER);
-			frame.setSize(300, 250);
-			frame.setVisible(true);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (checkExists(imagePath) != true) // checks if file path is valid
+			System.out.println("Invalid file path.");
+		else
+		{
+			try {
+	
+				BufferedImage image = ImageIO.read(new File(imagePath)); // reads
+																		// image
+				img = image; //sets private variable img equal to image
+	
+				JFrame frame = new JFrame(); 			//displays image
+	
+				JLabel jImage = new JLabel(new ImageIcon(image));
+				frame.getContentPane().add(jImage, BorderLayout.CENTER);
+				frame.setSize(300, 250);
+				frame.setVisible(true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	
+			System.out.println("Image height: " + img.getHeight());	//prints out image height and width
+			System.out.println("Image width: " + img.getWidth());
+		
 		}
-
-		System.out.println("Image height: " + img.getHeight());	//prints out image height and width
-		System.out.println("Image width: " + img.getWidth());
 
 	}
 
@@ -325,11 +307,10 @@ public class Steganography {
 
 		return false;
 	}
-
-	public static void main(String[] args) throws IOException {
-
+	
+	public static void getImageInput()
+	{
 		Scanner in = new Scanner(System.in);
-
 		System.out.println("Type '1' to input cover image path or '2' for default image: ");
 
 		if (in.hasNext() && !in.hasNextInt()) {
@@ -341,73 +322,88 @@ public class Steganography {
 			if (response == 1) {
 
 				System.out.println("Input image path: ");
-				String imagePath = in.nextLine();
-
-				if (checkExists(imagePath) == true) // checks if file path is
-													// valid
-					new Steganography(imagePath);
-				else
-					System.out.println("Invalid file path.");
-
+				imagePath = in.nextLine();
 			}
 
 			else if (response == 2) {
-
-				new Steganography();
+				
+				imagePath = "Img/icon.png";
 			}
-
-			BufferedImage encodedImage = null;
-
-			System.out.println("Type '1' to manually input text or '2' to read from text file: ");
-
-			if (in.hasNext() && !in.hasNextInt()) {
-				System.out.println("Please enter a valid option.");
-			} else {
-				int response2 = in.nextInt();
-				in.nextLine();
-
-				if (response2 == 1) {
-
-					System.out.println("Input text: ");
-					String message = in.nextLine();
-					// System.out.println(convertToBinary(message));
-
-					encodedImage = encodeImg(convertToBinary(message));
-
-					// System.out.println(message);
-
-				}
-
-				else if (response2 == 2) {
-
-					System.out.println("Please type name of file: ");
-
-					String fileName = in.nextLine();
-					BufferedReader br = new BufferedReader(new FileReader(fileName));
-
-					try {
-						StringBuilder sb = new StringBuilder();
-						String line = br.readLine();
-
-						while (line != null) {
-							sb.append(line);
-							sb.append(System.lineSeparator());
-							line = br.readLine();
-						}
-						messageString = sb.toString();
-					} finally {
-						br.close();
-					}
-
-					encodedImage = encodeImg(convertToBinary(messageString));
-
-				}
-
-				else
-					System.out.println("Please enter a valid option.");
-
-				decodeImg(encodedImage);
-			}
+			
+			else
+				System.out.println("Please enter a valid option");
 		}
 	}
+	
+	public static String getMessageInput() throws IOException
+	{
+		Scanner in = new Scanner(System.in);
+
+		System.out.println("Type '1' to manually input text or '2' to read from text file: ");
+
+		if (in.hasNext() && !in.hasNextInt()) {
+			System.out.println("Please enter a valid option.");
+		} else {
+			int response2 = in.nextInt();
+			in.nextLine();
+
+			if (response2 == 1) {
+
+				System.out.println("Input text: ");
+				messageString = in.nextLine();
+
+			}
+
+			else if (response2 == 2) {
+
+				System.out.println("Please type name of file: ");
+
+				String fileName = in.nextLine();
+				BufferedReader br = new BufferedReader(new FileReader(fileName));
+
+				try {
+					StringBuilder sb = new StringBuilder();
+					String line = br.readLine();
+
+					while (line != null) {
+						sb.append(line);
+						sb.append(System.lineSeparator());
+						line = br.readLine();
+					}
+					messageString = sb.toString();
+				} finally {
+					br.close();
+				}
+			}
+				
+			else
+				System.out.println("Please enter a valid option.");
+				
+				
+		}
+		
+		return messageString;
+	
+	}
+
+	public static void main(String[] args) throws IOException {
+		
+		BufferedImage encodedImage = null;
+
+			getImageInput();
+			
+			if(imagePath != null)
+			{
+				getMessageInput();
+				new Steganography(imagePath);
+				encodedImage = encodeImg(convertToBinary(messageString));
+				
+			}
+			
+
+				
+			if(encodedImage != null)
+				decodeImg(encodedImage);
+			}
 }
+
