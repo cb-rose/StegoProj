@@ -20,7 +20,7 @@ import javax.swing.JLabel;
 //hide text message in image
 //display stego image
 
-//to do: encode key, powerpoint slides
+//to do: encode key, powerpoint slides.
 
 public class MSBStegEncode{
 

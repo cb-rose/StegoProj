@@ -21,7 +21,7 @@ import javax.swing.JLabel;
 //display stego image
 
 //to do: powerpoint slides, desteg without losing image quality, save image to file
-//unit tests/debugging - still have errors in user input
+//unit tests/debugging - still have errors in user input.
 
 
 public class Steganography {
