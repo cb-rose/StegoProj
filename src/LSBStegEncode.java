@@ -24,7 +24,7 @@ import javax.swing.JLabel;
 //unit tests/debugging - still have errors in user input
 
 
-public class Steganography {
+public class LSBStegEncode {
 
 	private static BufferedImage img;
 	private static String mess;
@@ -32,7 +32,7 @@ public class Steganography {
 	private static String imagePath;
 	private static String filePath;
 
-	public Steganography(String imagePath) { // constructor displays cover image
+	public LSBStegEncode(String imagePath) { // constructor displays cover image
 												// and takes image
 												// as parameter
 		if (checkExists(imagePath) != true) // checks if file path is valid
@@ -303,172 +303,12 @@ public class Steganography {
 
 		}
 		
-		 ImageIO.write(newImg, "bmp", new File("Img/savedImg2.bmp"));
-
+		img = newImg;
 		return newImg;
 	}
 
 
-	// Decodes the encoded image, taking the encoded image as a parameter
-	public static void decodeImg(BufferedImage encImg) throws UnsupportedEncodingException {
-		int key = getKey(encImg);
-
-		byte[] bytes = new byte[key];
-
-		int count = 0;
-		for (int row = 0; row < img.getHeight(); row++) { // decode message
-			for (int col = 0; col < img.getWidth(); col++) {
-
-				Color c = new Color(encImg.getRGB(col, row));
-
-				if (key > count) {
-
-					// gets RGB
-					// value of
-					// pixel
-					int blue = c.getBlue(); // gets blue value of pixel
-					bytes[count] = (byte) (blue % 2); // uses modulus division
-														// to get LSB (0 or 1)
-
-					count++;
-				}
-
-				if (key > count) {
-
-					int red = c.getRed();
-					bytes[count] = (byte) (red % 2);
-
-					count++;
-				}
-
-				if (key > count) {
-
-					int green = c.getGreen();
-					bytes[count] = (byte) (green % 2);
-
-					count++;
-				}
-
-			}
-		}
-
-		// System.out.println("Count: " + count);
-
-		String binString = "";
-		for (int pos = 0; pos < bytes.length; pos++) { // concatenates bits to
-														// string
-			if (pos % 8 == 0 && pos != 0)
-				binString += " "; // adds a space every byte
-
-			binString += Integer.toBinaryString(bytes[pos]);
-
-		}
-		
-		//output = "Message in binary: " + binString + "\nMessage decoded: " + convertBinString(binString);
-		System.out.println("Message in binary: " + binString);
-		System.out.println("Message decoded: " + convertBinString(binString));
-		// converts binString to ASCII
-
-
-	}
-
-	public static int getKey(BufferedImage encImg) {
-		int key = 0;
-		ArrayList<Integer> symbolArray = new ArrayList<Integer>();
-		boolean foundSymbol = false;
-		String symbolString = "";
-
-		for (int row = 0; row < img.getHeight(); row++) { // decode message
-			for (int col = 0; col < img.getWidth(); col++) {
-
-				if (foundSymbol == false) {
-
-					Color c = new Color(encImg.getRGB(col, row));
-
-					if (symbolArray.size() == 24) {
-						symbolString = convertArrayListToBinaryString(symbolArray);
-
-						if (convertBinString(symbolString).equals("$$$"))
-							foundSymbol = true;
-						else {
-							symbolArray.remove(0);
-							int blue = c.getBlue();
-							symbolArray.add(blue % 2);
-							key++;
-						}
-					} else {
-						int blue = c.getBlue();
-						symbolArray.add(blue % 2);
-						key++;
-					}
-
-					if (symbolArray.size() == 24) {
-						symbolString = convertArrayListToBinaryString(symbolArray);
-
-						if (convertBinString(symbolString).equals("$$$"))
-							foundSymbol = true;
-						else {
-							symbolArray.remove(0);
-							int red = c.getRed();
-							symbolArray.add(red % 2);
-							key++;
-						}
-					} else {
-						int red = c.getRed();
-						symbolArray.add(red % 2);
-						key++;
-					}
-
-					if (symbolArray.size() == 24) {
-						symbolString = convertArrayListToBinaryString(symbolArray);
-
-						if (convertBinString(symbolString).equals("$$$"))
-							foundSymbol = true;
-						else {
-							symbolArray.remove(0);
-							int green = c.getGreen();
-							symbolArray.add(green % 2);
-							key++;
-						}
-					} else {
-						int green = c.getGreen();
-						symbolArray.add(green % 2);
-						key++;
-					}
-				}
-			}
-		}
-
-		key = key - 24; // gets rid of "$$$" at end of message
-
-		return key;
-
-	}
-
-	public static String convertArrayListToBinaryString(ArrayList<Integer> list) {
-		String binString = "";
-
-		for (int pos = 0; pos < list.size(); pos++) {
-			if (pos % 8 == 0 && pos != 0)
-				binString += " "; // adds a space every byte
-
-			binString += Integer.toBinaryString(list.get(pos));
-		}
-		
-		return binString;
-
-	}
-
-	public static String convertBinString(String s) { // converts binary string
-														// to ASCII
-		String[] a = s.split(" ");
-		StringBuilder sb = new StringBuilder();
-		for (int pos = 0; pos < a.length; pos++) {
-			sb.append((char) Integer.parseInt(a[pos], 2));
-		}
-		return sb.toString();
-	}
-
+	
 	public static void main(String[] args) throws IOException {
 		
 	Scanner in = new Scanner(System.in);
@@ -476,51 +316,25 @@ public class Steganography {
 		BufferedImage encodedImage = null;
 
 		getImageInput();
-		
-      /*  if (imagePath != null) {
-           getMessageInput();
-        if (messageString != null) {
-           new Steganography(imagePath);
-           encodedImage = encodeImg(convertToBinary(messageString));
-        }
-
-        else 
-		new Steganography(imagePath);
-        	if(img != null)
-           decodeImg(img);*/
-		/*new Steganography(imagePath);
-		if (imagePath != null) {
-			System.out.println("Type '1' to encode image or '2' to decode it.");
-			if(in.hasNext() && !in.hasNextInt())
-				System.out.println("Please enter a valid option.");
-			else if(in.nextInt() == 1)
-			{
-			getMessageInput();
-			if (messageString != null) {
-				//new Steganography(imagePath);
-				encodedImage = encodeImg(convertToBinary(messageString));
-			}
-			}
-			else if(in.nextInt() == 2)
-			{
-				//new Steganography(imagePath);
-				if(img != null)
-					decodeImg(img);
-			}
-			else
-				System.out.println("Please enter a valid option.");*/
-		
-
+	
 
 
 		if (imagePath != null) {
 			getMessageInput();
 			if (messageString != null) {
-				new Steganography(imagePath);
+				new LSBStegEncode(imagePath);
 				encodedImage = encodeImg(convertToBinary(messageString));
 
-				if (encodedImage != null)
-					decodeImg(encodedImage);
+		System.out.println("Save image? (y/n)");
+		String response = in.next();
+		if(response.equals("y") || response.equals("Y"))
+		{
+			System.out.println("Please type desired filename of image.");
+			 ImageIO.write(img, "bmp", new File("Img/" + in.next() + ".bmp"));
+			 System.out.println("Image saved.");
+		}
+		else
+			System.out.println("Image not saved.");
 		
 		
 		
@@ -537,9 +351,9 @@ public class Steganography {
 			
 
 			
-
+			}
         
-		}}
+		}
 		
 }
 }
